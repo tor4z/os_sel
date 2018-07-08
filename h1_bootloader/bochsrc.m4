@@ -4,8 +4,8 @@
 megs: 32
 
 # Filename of ROM images
-romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
-vgaromimage: file=/usr/share/vgabios/vgabios.bin
+romimage: file=_romimage
+vgaromimage: file=_vgaromimage
 
 
 # What disk image will be use
@@ -21,5 +21,5 @@ log: bochs.log
 mouse: enabled=0
 
 # Enable key mapping, using the US keyboard layout as default
-keyboard: keymap=/usr/local/share/bochs/keymaps/x11-pc-us.map
+keyboard: keymap=_keymap
 keyboard: user_shortcut=ctrl-alt-del
