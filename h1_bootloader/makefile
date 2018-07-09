@@ -21,6 +21,7 @@ bochsrc: bochsrc.m4
 	m4 -D_romimage=$(ROMIMAGE) -D_vgaromimage=$(VGAROMIMAGE) -D_keymap=$(KEYMAP) $^ > $@
 
 
+
 .PHONY: clean
 clean:
 	rm boot.bin a.img *.log bochsrc
