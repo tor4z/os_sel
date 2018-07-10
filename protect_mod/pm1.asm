@@ -4,7 +4,7 @@
 ;;;=================================
 	
 	%include "pm.inc"	; Include pm
-	org 07c00h
+	org 0100h
 	jmp LABEL_BEGIN
 	
 	[SECTION .gdt]
@@ -15,12 +15,12 @@ LABEL_DESC_CODE32:
 LABEL_DESC_VIDEO:
 	Descriptor 0b8000h, 0ffffh, DA_DRW
 	
-	GdtLen 	equ 	$ - LABEL_GDT
-	GdtPtr 	dw  	GdtLen - 1
+GdtLen 		equ 	$ - LABEL_GDT
+GdtPtr 		dw  	GdtLen - 1
 		dd	0
 
-	SelectorCode32	equ LABEL_DESC_CODE32 - LABEL_GDT
-	SelectorVideo	equ LABEL_DESC_VIDEO - LABEL_GDT
+SelectorCode32	equ LABEL_DESC_CODE32 - LABEL_GDT
+SelectorVideo	equ LABEL_DESC_VIDEO - LABEL_GDT
 
 	;; End of [SECTION .gdt]
 
@@ -36,7 +36,7 @@ LABEL_BEGIN:
 	xor eax, eax
 	mov ax, cs
 	shl eax, 4
-	add eax, LABEL_DESC_CODE32
+	add eax, LABEL_SEG_CODE32
 	mov word [LABEL_DESC_CODE32 + 2], ax
 	shr eax, 16
 	mov byte [LABEL_DESC_CODE32 + 4], al

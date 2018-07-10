@@ -10,9 +10,10 @@ vgaromimage: file=_vgaromimage
 
 # What disk image will be use
 floppya: 1_44=a.img, status=inserted
+floppyb: 1_44=b.img, status=inserted
 
 # Choose the boot disk
-boot: floppy
+boot: a
 
 # Where do we send the log message
 log: bochs.log
