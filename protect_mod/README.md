@@ -110,3 +110,66 @@ in al, 0x92
 or al, 2
 out 0x92, al
 ```
+
+
+### GDTR [See also](https://en.wikibooks.org/wiki/X86_Assembly/Global_Descriptor_Table)
+
+The GDT is pointed to by a special register in the x86 chip, the GDT
+Register, or simply the GDTR. The GDTR is 48 bits long. The lower
+16 bits tell the size of the GDT, and the upper 32 bits tell the location
+of the GDT in memory. Here is a layout of the GDTR:
+```
+0   15 16         47
+|LIMIT|----BASE----|
+```
+LIMIT is the size of the GDT, and BASE is the starting address. LIMIT
+is 1 less than the length of the table, so if LIMIT has the value 15,
+then the GDT is 16 bytes long.
+
+To load the GDTR, the instruction LGDT is used:
+```nasm
+lgdt [gdtr]
+```
+Where gdtr is a pointer to 6 bytes of memory containing the desired GDTR value.
+Note that to complete the process of loading a new GDT, the segment registers
+need to be reloaded. The CS register must be loaded using a far jump:
+```nasm
+flush_gdt:
+    lgdt [gdtr]
+    jmp 0x08:complete_flush	; 0x08 points at the new code selector
+ 
+complete_flush:
+    ;; Reload data segment register
+    mov ax, 0x10		; 0x10 points at the new data selector
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    ret
+```
+
+### LDT [See also](https://wiki.osdev.org/GDT_Tutorial#What.27s_so_special_about_the_LDT.3F)
+
+Much like the GDT (global descriptor table), the LDT (local descriptor table)
+contains descriptors for memory segments description, call gates, etc. The good
+thing with the LDT is that each task can have its own LDT and that the processor
+will automatically switch to the right LDT when you use hardware task switching.
+
+Since its content may be different in each task, the LDT is not a suitable place
+to put system stuff such as TSS or other LDT descriptors: Those are the sole
+property of the GDT. Since it is meant to change often, the command used for
+loading an LDT is a bit different from the GDT and IDT loading. Rather than giving
+directly the LDT's base address and size, those parameters are stored in a descriptor
+of the GDT (with proper "LDT" type) and the selector of that entry is given. 
+```
+               GDTR (base + limit)
+              +-- GDT ------------+
+              |                   |
+SELECTOR ---> [LDT descriptor     ]----> LDTR (base + limit)
+              |                   |     +-- LDT ------------+
+              |                   |     |                   |
+             ...                 ...   ...                 ...
+              +-------------------+     +-------------------+
+
+```
