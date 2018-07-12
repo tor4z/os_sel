@@ -52,7 +52,7 @@ LABEL_BEGIN:
 	xor eax, eax
 	mov ax, ds
 	shl eax, 4
-	add eax, LABEL_GDT	; Move GDT Base to EAX
+	add eax, LABEL_GDT	; Add GDT base to EAX, segment * 16 + offset
 	mov dword [GdtPtr + 2], eax ; Set GDT Base to [GdtPr + 2]
 
 	lgdt [GdtPtr]		; Load GDTR
