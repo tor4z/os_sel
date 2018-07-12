@@ -66,16 +66,42 @@ byte 4  |bit 23<---------------- segment base-------------------->bit 16|
         +-------+-------+-------+-------+-------+-------+-------+-------+
 
         +-------+-------+-------+-------+-------+-------+-------+-------+
-byte 5  |   P   |      DPL      | <----------- segment type ----------> |
+byte 5  |   P   |      DPL      |   S   |<---- segment type --->|   A   |
         +-------+-------+-------+-------+-------+-------+-------+-------+
+	  |           |              |        |                     |
+	  |           |              |        |   A=0, Segment not accessed
+	  |           |              |        |   A=1, Segment has been accessed
+	  |  Set the desc. privilege |        +---------------+
+	  |  level                   |                        |
+	  |                          S=0, System descriptor   |
+	  |                          S=1, Code, dtaa or stack |
+  P=0, descriptor is undifined.                               |
+  P=1, descriptor contain a valid            000 Data, read-only
+       base and limit                        001 Data, read/write
+       
+       	    				     010 Stack read-only
+					     011 Stack read/write
+					
+					     100 Code execute-only
+  					     101 Code execute/read
+					
+					     110 Code execute-only, conforming
+					     111 Code execute/read, conforming
+
+http://ece-research.unm.edu/jimp/310/slides/micro_arch2.html
 ```
 P is the Segment Present bit. It should always be 1.
+When P is 1 mean segment in the memory, else if P is 0 mean segment
+is not in the memory.
 
 DPL is the DESCRIPTOR PRIVILEGE LEVEL. For simple code like this, these
 two bits should always be zeroes.
+The bigger of DPL value mean the privilege is lower.
 
 Segment Type (again, for simple code like this) is hex 12 for data
 segments, hex 1A for code segments.
+
+
 ```
         +-------+-------+-------+-------+-------+-------+-------+-------+
 byte 6  |   G   |   B   |   0   | avail | bit 19<-- seg limit--->bit 16 |
