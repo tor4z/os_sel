@@ -159,9 +159,10 @@ will automatically switch to the right LDT when you use hardware task switching.
 Since its content may be different in each task, the LDT is not a suitable place
 to put system stuff such as TSS or other LDT descriptors: Those are the sole
 property of the GDT. Since it is meant to change often, the command used for
-loading an LDT is a bit different from the GDT and IDT loading. Rather than giving
-directly the LDT's base address and size, those parameters are stored in a descriptor
-of the GDT (with proper "LDT" type) and the selector of that entry is given. 
+loading an LDT is a bit different from the GDT and IDT loading. Rather than
+giving directly the LDT's base address and size, those parameters are stored
+in a descriptor of the GDT (with proper "LDT" type) and the selector of that
+entry is given. 
 ```
                GDTR (base + limit)
               +-- GDT ------------+
@@ -172,4 +173,41 @@ SELECTOR ---> [LDT descriptor     ]----> LDTR (base + limit)
              ...                 ...   ...                 ...
               +-------------------+     +-------------------+
 
+```
+
+
+###  Prepare to Switch to protected mode, Set PE to 1
+
+The CR0 register is 32 bits long on the 386 and higher processors. On x86-64
+processors in long mode, it (and the other control registers) is 64 bits
+long. CR0 has various control flags that modify the basic operation of the
+processor.
+
+|Bit 	|Name 	|Full Name                  |Description|
+|-------|-------|---------------------------|-----------|
+|0 	|PE 	|Protected Mode Enable 	    |If 1, system is in protected mode, else system is in real mode
+|1 	|MP 	|Monitor co-processor 	    |Controls interaction of WAIT/FWAIT instructions with TS flag in CR0
+|2 	|EM 	|Emulation 	            |If set, no x87 floating point unit present, if clear, x87 FPU present
+|3 	|TS 	|Task switched 	            |Allows saving x87 task context upon a task switch only after x87 instruction used
+|4 	|ET 	|Extension type 	    |On the 386, it allowed to specify whether the external math coprocessor was an 80287 or 80387
+|5 	|NE 	|Numeric error 	            |Enable internal x87 floating point error reporting when set, else enables PC style x87 error detection
+|16 	|WP 	|Write protect 	            |When set, the CPU can't write to read-only pages when privilege level is 0
+|18 	|AM 	|Alignment mask 	    |Alignment check enabled if AM set, AC flag (in EFLAGS register) set, and privilege level is 3
+|29 	|NW 	|Not-write through 	    |Globally enables/disable write-through caching
+|30 	|CD 	|Cache disable 	            |Globally enables/disable the memory cache
+|31 	|PG 	|Paging 	            |If 1, enable paging and use the CR3 register, else disable paging
+
+
+```
+ 31 30 29                   19 18 17 16                  6 5  4  3  2  1  0
++----------------------------------------------------------------------------
+|PG|CD|NW|                    |AM|  |WP|                  |NE|ET|TS|EM|MP|PE|
++----------------------------------------------------------------------------
+				cr0 register
+```
+
+```nasm
+mov eax, cr0
+or eax, 1
+mov cr0, eax
 ```
