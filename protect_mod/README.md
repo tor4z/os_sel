@@ -1,5 +1,15 @@
 # Protected Mode
 
+
+### Step to entering protected mode
+
+1. Prepare for GDT
+2. Load GDTR with lgdt
+3. Enable A20
+4. Set PE of cr0 to 1
+5. Jump and enter protected mode
+
+
 ### Addressing
 
 `Physical Address = Segment * 16 + Offset`
