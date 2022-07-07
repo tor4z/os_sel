@@ -45,8 +45,11 @@
 # Kernel Module Compile Results
 *.mod*
 *.cmd
+*.bin
+*.img
 .tmp_versions/
 modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+.vscode
