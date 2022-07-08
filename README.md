@@ -12,6 +12,18 @@ BH = page number, 0
 BL = foreground color (graphics modes only)
 ```
 
+```
+== VIDEO - SET VIDEO MODE ==
+AH = 00h
+AL = desired video mode, see http://www.ctyme.com/intr/rb-0069.htm#Table10
+== Return:
+AL = video mode flag (Phoenix, AMI BIOS)
+20h mode > 7
+30h modes 0-5 and 7
+3Fh mode 6
+AL = CRT controller mode byte (Phoenix 386 BIOS v1.10)
+```
+
 INT 0x13 is for storage (HDD and FDD)
 
 ```

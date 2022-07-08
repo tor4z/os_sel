@@ -1,0 +1,220 @@
+
+entry.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <start>:
+
+  
+
+
+  # Set up the important data segment registers (DS, ES, SS).
+  xorw    %ax,%ax             # Segment number zero
+   0:	31 c0                	xor    %eax,%eax
+  movw    %ax,%ds             # -> Data Segment
+   2:	8e d8                	mov    %eax,%ds
+  movw    %ax,%es             # -> Extra Segment
+   4:	8e c0                	mov    %eax,%es
+  movw    %ax,%ss             # -> Stack Segment
+   6:	8e d0                	mov    %eax,%ss
+  
+  movb $0x13,%al  # ;vga 320x200x8 位,color mode 
+   8:	b0 13                	mov    $0x13,%al
+  movb $0x00,%ah
+   a:	b4 00                	mov    $0x0,%ah
+  int $0x10
+   c:	cd 10                	int    $0x10
+  
+#save color mode in ram 0x0ff0
+ movb $8,(VMODE)
+   e:	c6 06 f2             	movb   $0xf2,(%esi)
+  11:	0f 08                	invd   
+ movw $320,(SCRNX)
+  13:	c7 06 f4 0f 40 01    	movl   $0x1400ff4,(%esi)
+ movw $200,(SCRNY)
+  19:	c7 06 f6 0f c8 00    	movl   $0xc80ff6,(%esi)
+ movl $0x000a0000,(VRAM)
+  1f:	66 c7 06 f8 0f       	movw   $0xff8,(%esi)
+  24:	00 00                	add    %al,(%eax)
+  26:	0a 00                	or     (%eax),%al
+
+ #get keyboard led status
+ movb	$0x02,%ah 
+  28:	b4 02                	mov    $0x2,%ah
+ int     $0x16			#keyboard interrupts
+  2a:	cd 16                	int    $0x16
+ movb   %al,(LEDS)
+  2c:	a2 f1 0f be 65       	mov    %al,0x65be0ff1
+		
+		
+		
+#diplay something
+  movw $msg,%si
+  31:	00 e8                	add    %ch,%al
+  call puts
+  33:	5d                   	pop    %ebp
+  34:	00 be 81 00 e8 57    	add    %bh,0x57e80081(%esi)
+  
+  movw $try,%si
+  call puts
+  3a:	00 fa                	add    %bh,%dl
+  
+
+  #jmp .
+   cli                         # Disable interrupts
+   cld                         # String operations increment
+  3c:	fc                   	cld    
+
+0000003d <seta20.1>:
+  # Enable A20:
+  #   For backwards compatibility with the earliest PCs, physical
+  #   address line 20 is tied low, so that addresses higher than
+  #   1MB wrap around to zero by default.  This code undoes this. 
+seta20.1:
+  inb     $0x64,%al               # Wait for not busy
+  3d:	e4 64                	in     $0x64,%al
+  testb   $0x2,%al
+  3f:	a8 02                	test   $0x2,%al
+  jnz     seta20.1
+  41:	75 fa                	jne    3d <seta20.1>
+
+  movb    $0xd1,%al               # 0xd1 -> port 0x64
+  43:	b0 d1                	mov    $0xd1,%al
+  outb    %al,$0x64
+  45:	e6 64                	out    %al,$0x64
+
+00000047 <seta20.2>:
+
+seta20.2:
+  inb     $0x64,%al               # Wait for not busy
+  47:	e4 64                	in     $0x64,%al
+  testb   $02,%al
+  49:	a8 02                	test   $0x2,%al
+  jnz     seta20.2
+  4b:	75 fa                	jne    47 <seta20.2>
+
+  movb    $0xdf,%al               # 0xdf -> port 0x60
+  4d:	b0 df                	mov    $0xdf,%al
+  outb    %al,$0x60
+  4f:	e6 60                	out    %al,$0x60
+
+  # Switch from real to protected mode, using a bootstrap GDT       this is vip ,but i don`t know it clearly now
+  # and segment translation that makes virtual addresses 
+  # identical to their physical addresses, so that the 
+  # effective memory map does not change during the switch.
+  lgdt    gdtdesc
+  51:	0f 01 16             	lgdtl  (%esi)
+  54:	d4 00                	aam    $0x0
+  movl    %cr0, %eax
+  56:	0f 20 c0             	mov    %cr0,%eax
+  orl     $CR0_PE_ON, %eax
+  59:	66 83 c8 01          	or     $0x1,%ax
+  movl    %eax, %cr0
+  5d:	0f 22 c0             	mov    %eax,%cr0
+  
+  # Jump to next instruction, but in 32-bit code segment.
+  # Switches processor into 32-bit mode.
+
+  ljmp    $PROT_MODE_CSEG, $protcseg
+  60:	ea                   	.byte 0xea
+  61:	a5                   	movsl  %ds:(%esi),%es:(%edi)
+  62:	00 08                	add    %cl,(%eax)
+	...
+
+00000065 <msg>:
+  65:	0d 0a 0a 0d 6d       	or     $0x6d0d0a0a,%eax
+  6a:	79 20                	jns    8c <try+0xb>
+  6c:	6b 65 72 6e          	imul   $0x6e,0x72(%ebp),%esp
+  70:	65 6c                	gs insb (%dx),%es:(%edi)
+  72:	20 69 73             	and    %ch,0x73(%ecx)
+  75:	20 72 75             	and    %dh,0x75(%edx)
+  78:	6e                   	outsb  %ds:(%esi),(%dx)
+  79:	69 6e 67 20 6a 6f 73 	imul   $0x736f6a20,0x67(%esi),%ebp
+	...
+
+00000081 <try>:
+  81:	0d 0a 0a 0d 74       	or     $0x740d0a0a,%eax
+  86:	72 79                	jb     101 <gdtdesc+0x2d>
+  88:	20 69 74             	and    %ch,0x74(%ecx)
+  8b:	20 61 67             	and    %ah,0x67(%ecx)
+  8e:	61                   	popa   
+  8f:	69                   	.byte 0x69
+  90:	6e                   	outsb  %ds:(%esi),(%dx)
+	...
+
+00000092 <puts>:
+ try:
+  .asciz "\r\n\n\rtry it again"
+
+puts:
+
+	movb (%si),%al
+  92:	8a 04 83             	mov    (%ebx,%eax,4),%al
+	add $1,%si
+  95:	c6 01 3c             	movb   $0x3c,(%ecx)
+	cmp $0,%al
+  98:	00 74 09 b4          	add    %dh,-0x4c(%ecx,%ecx,1)
+	je over
+	movb $0x0e,%ah
+  9c:	0e                   	push   %cs
+	movw $15,%bx
+  9d:	bb 0f 00 cd 10       	mov    $0x10cd000f,%ebx
+	int $0x10
+	jmp puts
+  a2:	eb ee                	jmp    92 <puts>
+
+000000a4 <over>:
+over:
+	ret	
+  a4:	c3                   	ret    
+
+000000a5 <protcseg>:
+	
+	
+  .code32                     # Assemble for 32-bit mode
+protcseg:
+  # Set up the protected-mode data segment registers
+  movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+  a5:	66 b8 10 00          	mov    $0x10,%ax
+  movw    %ax, %ds                # -> DS: Data Segment
+  a9:	8e d8                	mov    %eax,%ds
+  movw    %ax, %es                # -> ES: Extra Segment
+  ab:	8e c0                	mov    %eax,%es
+  movw    %ax, %fs                # -> FS
+  ad:	8e e0                	mov    %eax,%fs
+  movw    %ax, %gs                # -> GS
+  af:	8e e8                	mov    %eax,%gs
+  movw    %ax, %ss                # -> SS: Stack Segment
+  b1:	8e d0                	mov    %eax,%ss
+  
+  # Set up the stack pointer and call into C.
+  movl    $start, %esp
+  b3:	bc 00 00 00 00       	mov    $0x0,%esp
+
+000000b8 <spin>:
+  # call bootmain
+
+  # If bootmain returns (it shouldn't), loop.
+spin:
+  jmp spin
+  b8:	eb fe                	jmp    b8 <spin>
+  ba:	66 90                	xchg   %ax,%ax
+
+000000bc <gdt>:
+	...
+  c4:	ff                   	(bad)  
+  c5:	ff 00                	incl   (%eax)
+  c7:	00 00                	add    %al,(%eax)
+  c9:	9a cf 00 ff ff 00 00 	lcall  $0x0,$0xffff00cf
+  d0:	00                   	.byte 0x0
+  d1:	92                   	xchg   %eax,%edx
+  d2:	cf                   	iret   
+	...
+
+000000d4 <gdtdesc>:
+  d4:	17                   	pop    %ss
+  d5:	00                   	.byte 0x0
+  d6:	bc                   	.byte 0xbc
+  d7:	00 00                	add    %al,(%eax)
+	...

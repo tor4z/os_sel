@@ -88,7 +88,7 @@ putover:
 
 fin:
     ; 0x4400: the kernel in disk
-    ; 0x200 boot sector size
+    ; 0x200: boot sector size
     ; 0x4200 = 0x4400 - 0x200
     jmp 0xc400  ; 0x820 * 0x10 + 0x4200
     ; hlt

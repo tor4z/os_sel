@@ -2,16 +2,16 @@
 boot.bin: boot.asm
 	nasm -o boot.bin boot.asm
 
-.PHONY: kernel.bin
-kernel.bin: kernel.asm
-	nasm -o kernel.bin kernel.asm
+.PHONY: build_kernel
+build_kernel:
+	make -C kernel
 
 .PHONY: cpy_kernel
-cpy_kernel: kernel.bin a.img
-	@mkdir -p /tmp/floppy
-	@mount -o loop a.img /tmp/floppy -o fat=12
-	@cp kernel.bin /tmp/floppy
-	@umount /tmp/floppy
+cpy_kernel: build_kernel a.img
+	mkdir -p /tmp/floppy
+	mount -o loop a.img /tmp/floppy -o fat=12
+	cp kernel/kernel.bin /tmp/floppy
+	umount /tmp/floppy
 
 .PHONY: a.img
 a.img: boot.bin
@@ -26,3 +26,4 @@ run: cpy_kernel
 .PHONY: clean
 clean:
 	@-rm -f boot.bin a.img kernel.bin
+	make -C kernel clean
