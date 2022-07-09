@@ -20,7 +20,6 @@ msg:
 main:
     subq $8, %rsp
     leaq msg(%rip), %rdi
-    # xor %al, %al
     call puts
 
     xor %edi, %edi

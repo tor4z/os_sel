@@ -1,0 +1,32 @@
+    .section .data
+value1:
+    .int 1, -1
+value2:
+    .byte 0x10, 0x05, 0xff, 0x32, 0x47, 0xe4, 0x00, 0x01
+
+    .section .text
+    .globl _start
+_start:
+    nop
+    movq value1, %mm0
+    # big endian
+    # the value of mm0
+    # {
+    #  uint64 = 0xffffffff00000001,
+    #  v2_int32 = {0x1, 0xffffffff},
+    #  v4_int16 = {0x1, 0x0, 0xffff, 0xffff},
+    #  v8_int8 = {0x1, 0x0, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff}
+    # }
+    movq value2, %mm1
+    # big endian
+    # the value of mm1
+    # {
+    #  uint64 = 0x100e44732ff0510,
+    #  v2_int32 = {0x32ff0510, 0x100e447},
+    #  v4_int16 = {0x510, 0x32ff, 0xe447, 0x100},
+    #  v8_int8 = {0x10, 0x5, 0xff, 0x32, 0x47, 0xe4, 0x0, 0x1}
+    # }
+
+    movl $1, %eax
+    movl $0, %ebx
+    int $0x80
