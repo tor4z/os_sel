@@ -47,6 +47,9 @@
 *.cmd
 *.bin
 *.img
+*.iso
+
+isodir/
 .tmp_versions/
 modules.order
 Module.symvers

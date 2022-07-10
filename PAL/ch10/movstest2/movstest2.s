@@ -1,6 +1,6 @@
     .section .data
 value1:
-    .ascii ""
+    .ascii "This is a test string.\n"
 
     .section .bss
     .lcomm output, 23
@@ -15,6 +15,9 @@ _start:
     # Set DF flag, which making esi and edi regosters are
     # decremented while executing movs instructions
     std
+    # Even though the ESI and EDI registers are counting
+    # backward, the MOVW and MOVL instructions are getting
+    # the memory locations in forward order. 
     movsb                   # move a byte
     movsw                   # move two bytes
     movsl                   # move four bytes
