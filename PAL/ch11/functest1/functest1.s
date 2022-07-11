@@ -15,10 +15,13 @@ _start:
     movl $10, %ebx
     call area
 
+    movl $1, %eax
+    movl $0, %ebx
+    int $0x80
 
 .type area, @function
 area:
-    fldpi
+    fldpi                   # push pi into FPU stack
     imull %ebx, %ebx
     movl %ebx, value
     fild value
