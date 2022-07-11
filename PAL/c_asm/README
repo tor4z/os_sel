@@ -1,0 +1,79 @@
+## Commonly used constraints.
+
+### Register operand constraint(r)
+
+```
++---+--------------------+
+| r |    Register(s)     |
++---+--------------------+
+| a |   %eax, %ax, %al   |
+| b |   %ebx, %bx, %bl   |
+| c |   %ecx, %cx, %cl   |
+| d |   %edx, %dx, %dl   |
+| S |   %esi, %si        |
+| D |   %edi, %di        |
++---+--------------------+
+```
+
+### Memory operand constraint(m)
+
+
+### Matching(Digit) constraints
+
+In some cases, a single variable may serve as both the input and the output operand. Such cases may be specified in "asm" by using matching constraints.
+
+```c
+asm ("incl %0" :"=a"(var):"0"(var));
+```
+
+Some other constraints used are:
+
+- "m" : A memory operand is allowed, with any kind of address that the machine supports in general.
+
+- "o" : A memory operand is allowed, but only if the address is offsettable. ie, adding a small offset to the address gives a valid address.
+
+- "V" : A memory operand that is not offsettable. In other words, anything that would fit the `m’ constraint but not the `o’constraint.
+
+- "i" : An immediate integer operand (one with constant value) is allowed. This includes symbolic constants whose values will be known only at assembly time.
+
+- "n" : An immediate integer operand with a known numeric value is allowed. Many systems cannot support assembly-time constants for operands less than a word wide. Constraints for these operands should use ’n’ rather than ’i’.
+
+- "g" : Any register, memory or immediate integer operand is allowed, except for registers that are not general registers.
+
+
+
+Following constraints are x86 specific.
+
+- "r" : Register operand constraint, look table given above.
+
+- "q" : Registers a, b, c or d.
+
+- "I" : Constant in range 0 to 31 (for 32-bit shifts).
+
+- "J" : Constant in range 0 to 63 (for 64-bit shifts).
+
+- "K" : 0xff.
+
+- "L" : 0xffff.
+
+- "M" : 0, 1, 2, or 3 (shifts for lea instruction).
+
+- "N" : Constant in range 0 to 255 (for out instruction).
+
+- "f" : Floating point register
+
+- "t" : First (top of stack) floating point register
+
+- "u" : Second floating point register
+
+- "A" : Specifies the `a’ or `d’ registers. This is primarily useful for 64-bit integer values intended to be returned with the `d’ register holding the most significant bits and the `a’ register holding the least significant bits.
+
+
+
+## Constraint Modifiers.
+
+- "=" : Means that this operand is write-only for this instruction; the previous value is discarded and replaced by output data.
+
+- "&" : Means that this operand is an earlyclobber operand, which is modified before the instruction is finished using the input operands. Therefore, this operand may not lie in a register that is used as an input operand or as part of any memory address. An input operand can be tied to an earlyclobber operand if its only use as an input occurs before the early result is written.
+
+
