@@ -1,2 +1,0 @@
-#define CYLINDER 10
-
